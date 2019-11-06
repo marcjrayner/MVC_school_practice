@@ -1,14 +1,14 @@
 require_relative('../db/sql_runner.rb')
 
 class Student
-  attr_accessor :first_name, :second_name, :age, :house
+  attr_accessor :first_name, :second_name, :age, :house_id
   attr_reader :id
 
   def initialize(options)
     @id = options['id'].to_i if options['id']
     @first_name = options['first_name']
     @second_name = options['second_name']
-    @house = options['house']
+    @house_id = options['house_id'].to_i
     @age = options['age'].to_i
   end
 
@@ -17,7 +17,7 @@ class Student
     (
       first_name,
       second_name,
-      house,
+      house_id,
       age
     )
     VALUES
@@ -25,7 +25,7 @@ class Student
       $1, $2, $3, $4
     )
     RETURNING *"
-    values = [@first_name, @second_name, @house, @age]
+    values = [@first_name, @second_name, @house_id, @age]
     student_data = SqlRunner.run(sql, values)
     @id = student_data.first()['id'].to_i
   end
@@ -36,7 +36,7 @@ class Student
     (
       first_name,
       second_name,
-      house,
+      house_id,
       age
     ) =
     (
@@ -52,6 +52,15 @@ class Student
     WHERE id = $1"
     values = [@id]
     SqlRunner.run( sql, values )
+  end
+
+  def house
+    sql =" SELECT * FROM houses
+    WHERE id=$1"
+    values =[@house_id]
+    houseinfo= SqlRunner.run(sql, values)[0]
+    house = House.new(houseinfo)
+    return house
   end
 
   def self.delete_all
@@ -74,6 +83,8 @@ class Student
     result = Student.new( student.first )
     return result
   end
+
+
 
 
 
